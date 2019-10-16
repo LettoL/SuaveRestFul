@@ -3,6 +3,9 @@ open Newtonsoft.Json
 open Newtonsoft.Json.Serialization
 open Suave
 open Suave
+open Suave
+open Suave
+open Suave
 open Suave.Successful
 open Suave.Operators
 open Suave.Filters
@@ -14,6 +17,9 @@ module RestFul =
     Create : 'a -> 'a
     Update : 'a -> 'a option
     Delete : int -> unit
+    GetById : int -> 'a option
+    UpdateById : int -> 'a -> 'a option
+    IsExists : int -> bool
   }
   
   let JSON v =
@@ -49,6 +55,16 @@ module RestFul =
     let deleteResourceById id =
       resource.Delete id
       NO_CONTENT
+      
+    let getResourceById =
+      resource.GetById >> handleResource (RequestErrors.NOT_FOUND "Resource not found")
+      
+    let updateResourceById id =
+      request (getResourceFromReq >>
+                (resource.UpdateById id) >> handleResource badRequest)
+    
+    let isResourceExists id =
+      if resource.IsExists id then Successful.OK "" else RequestErrors.NOT_FOUND ""
     
     choose [
       path resourcePath >=> choose [
@@ -59,4 +75,7 @@ module RestFul =
                    resource.Update >> handleResource badRequest)
       ]
       DELETE >=> pathScan resourceIdPath deleteResourceById
+      GET >=> pathScan resourceIdPath getResourceById
+      PUT >=> pathScan resourceIdPath updateResourceById
+      HEAD >=> pathScan resourceIdPath isResourceExists
     ]

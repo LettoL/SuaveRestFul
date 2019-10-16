@@ -10,6 +10,9 @@ let main argv =
       Create = Db.createPerson
       Update = Db.updatePerson
       Delete = Db.deletePerson
+      GetById = Db.gerPerson
+      UpdateById = Db.updatePersonByID
+      IsExists = Db.isPersonExists
     }
     startWebServer defaultConfig personWebPart
     0
